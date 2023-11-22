@@ -21,6 +21,20 @@ class UserController {
     res.send(userList);
   };
 
+  getAllCoach = async (req, res, next) => {
+    let userList = await UserModel.find({ role: "Coach" });
+    if (!userList.length) {
+      throw new HttpException(404, "Coach not found");
+    }
+
+    userList = userList.map((user) => {
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    });
+
+    res.send(userList);
+  };
+
   getUserById = async (req, res, next) => {
     const user = await UserModel.findOne({ id: req.params.id });
     if (!user) {
@@ -70,8 +84,6 @@ class UserController {
 
     const { confirm_password, ...restOfUpdates } = req.body;
 
-    // do the update query and get the result
-    // it can be partial edit
     const result = await UserModel.update(restOfUpdates, req.params.id);
 
     if (!result) {
