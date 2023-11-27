@@ -6,7 +6,7 @@ const errorMiddleware = require("./middleware/error.middleware");
 const userRouter = require("./routes/user.route");
 
 const app = express();
-dotenv.config();
+require('dotenv').config();
 app.use(express.json());
 app.use(cors());
 app.options("*", cors());

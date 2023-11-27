@@ -134,6 +134,84 @@ class UserController {
       req.body.password = await bcrypt.hash(req.body.password, 8);
     }
   };
+
+  /////
+  rateCoach = async (req, res, next) => {
+    this.checkValidation(req);
+
+    const { coachId, rating } = req.body;
+    const userId = req.currentUser.id; // Assuming you have the user ID in the request
+
+    const result = await UserModel.rateCoach(userId, coachId, rating);
+
+    if (!result) {
+        throw new HttpException(500, "Something went wrong");
+    }
+
+    res.status(201).send("Coach has been rated!");
+};
+///////////
+getCoachRatingById = async (req, res, next) => {
+  try {
+    const coachId = req.params.coachId;
+    const coachRating = await UserModel.getCoachRatingById(coachId);
+
+    if (!coachRating) {
+      throw new HttpException(404, "Aucun rating de coach trouvé");
+    }
+
+    res.send(coachRating);
+  } catch (error) {
+    next(error);
+  }
+};
+
+addCommentToCoach = async (req, res, next) => {
+  try {
+    const { coachId, comment } = req.body;
+
+    // L'ID de l'utilisateur est extrait à partir du token
+    const userId = req.currentUser.id;
+
+    const result = await UserModel.addComment({ userId, coachId, comment });
+
+
+    if (!result) {
+      throw new HttpException(500, "Erreur lors de l'ajout du commentaire");
+    }
+
+    res.status(201).send("Commentaire ajouté avec succès !");
+  } catch (error) {
+    next(error);
+  }
+};
+
+getCoachComments = async (req, res, next) => {
+  try {
+    const coachId = req.params.coachId;
+    const comments = await UserModel.getCoachComments(coachId);
+
+    // Manipulez les données comme vous le souhaitez avant de les renvoyer
+    const formattedComments = comments.map((comment) => ({
+      
+      comment: comment.comment,
+      created_at: comment.created_at,
+      user: {
+        nom: comment.user_nom,
+        prenom: comment.user_prenom,
+      },
+    }));
+
+    res.send(formattedComments);
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+
+
 }
 
 module.exports = new UserController();

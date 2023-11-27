@@ -45,4 +45,26 @@ router.post(
   awaitHandlerFactory(userController.userLogin)
 ); // localhost:3000/api/v1/users/login
 
+router.post(
+  "/rate-coach",
+  auth(Role.Athlete),
+  awaitHandlerFactory(userController.rateCoach)
+);///api/v1/users/rate-coach
+
+router.get(
+  "/rate-coach/:coachId",
+  auth(),
+  awaitHandlerFactory(userController.getCoachRatingById)
+);
+///api/v1/users/coach-ratings
+
+router.post("/add-comment",
+ auth(Role.Athlete),
+  awaitHandlerFactory(userController.addCommentToCoach)
+  );
+  router.get("/coach-comments/:coachId", 
+  auth(), 
+  awaitHandlerFactory(userController.getCoachComments));
+
+
 module.exports = router;
