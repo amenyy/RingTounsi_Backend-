@@ -8,7 +8,7 @@ const coachRouter = require("./routes/coach.route");
 
 
 const app = express();
-dotenv.config();
+require('dotenv').config();
 app.use(express.json());
 app.use(cors());
 app.options("*", cors());

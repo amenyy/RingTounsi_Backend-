@@ -27,7 +27,7 @@ class CoachController {
 
     await this.hashPassword(req);
 
-    req.body.role = "coach"; // Set the role to "coach" specifically
+    req.body.role = "Coach"; // Set the role to "coach" specifically
 
     const result = await UserModel.create(req.body);
 
