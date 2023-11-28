@@ -10,9 +10,9 @@ const {
   updateUserSchema,
   validateLogin,
 } = require("../middleware/validators/userValidator.middleware");
-
 router.get("/", awaitHandlerFactory(userController.getAllUsers)); // localhost:3000/api/v1/users
-router.get("/coach", awaitHandlerFactory(userController.getAllCoach)); // localhost:3000/api/v1/users/coach
+
+//router.get("/", auth(), awaitHandlerFactory(userController.getAllUsers)); // localhost:3000/api/v1/users
 router.get("/id/:id", auth(), awaitHandlerFactory(userController.getUserById)); // localhost:3000/api/v1/users/id/1
 router.get(
   "/username/:username",
@@ -31,7 +31,6 @@ router.post(
 ); // localhost:3000/api/v1/users
 router.patch(
   "/id/:id",
-  auth(Role.Admin),
   updateUserSchema,
   awaitHandlerFactory(userController.updateUser)
 ); // localhost:3000/api/v1/users/id/1 , using patch for partial update
@@ -46,5 +45,27 @@ router.post(
   validateLogin,
   awaitHandlerFactory(userController.userLogin)
 ); // localhost:3000/api/v1/users/login
+
+router.post(
+  "/rate-coach",
+  auth(Role.Athlete),
+  awaitHandlerFactory(userController.rateCoach)
+);///api/v1/users/rate-coach
+
+router.get(
+  "/rate-coach/:coachId",
+  auth(),
+  awaitHandlerFactory(userController.getCoachRatingById)
+);
+///api/v1/users/coach-ratings
+
+router.post("/add-comment",
+ auth(Role.Athlete),
+  awaitHandlerFactory(userController.addCommentToCoach)
+  );
+  router.get("/coach-comments/:coachId", 
+  auth(), 
+  awaitHandlerFactory(userController.getCoachComments));
+
 
 module.exports = router;

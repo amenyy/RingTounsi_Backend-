@@ -21,20 +21,6 @@ class UserController {
     res.send(userList);
   };
 
-  getAllCoach = async (req, res, next) => {
-    let userList = await UserModel.find({ role: "Coach" });
-    if (!userList.length) {
-      throw new HttpException(404, "Coach not found");
-    }
-
-    userList = userList.map((user) => {
-      const { password, ...userWithoutPassword } = user;
-      return userWithoutPassword;
-    });
-
-    res.send(userList);
-  };
-
   getUserById = async (req, res, next) => {
     const user = await UserModel.findOne({ id: req.params.id });
     if (!user) {
@@ -68,7 +54,16 @@ class UserController {
 
     await this.hashPassword(req);
 
-    const result = await UserModel.create(req.body);
+    const { role } = req.body;
+    let status = "";
+
+    if (role === "Coach") {
+      status = "pending"; // If the role is coach, set status as pending
+    } else {
+      status = "approved"; // For other roles, set status as approved
+    }
+
+    const result = await UserModel.create({ ...req.body, status });
 
     if (!result) {
       throw new HttpException(500, "Something went wrong");
@@ -79,15 +74,13 @@ class UserController {
 
   updateUser = async (req, res, next) => {
     this.checkValidation(req);
-
     await this.hashPassword(req);
-
     const { confirm_password, ...restOfUpdates } = req.body;
 
     const result = await UserModel.update(restOfUpdates, req.params.id);
 
     if (!result) {
-      throw new HttpException(404, "Something went wrong");
+      throw new HttpException(404, "User not found");
     }
 
     const { affectedRows, changedRows, info } = result;
@@ -96,7 +89,7 @@ class UserController {
       ? "User not found"
       : affectedRows && changedRows
       ? "User updated successfully"
-      : "Updated faild";
+      : "Updated failed";
 
     res.send({ message, info });
   };
@@ -148,6 +141,77 @@ class UserController {
   hashPassword = async (req) => {
     if (req.body.password) {
       req.body.password = await bcrypt.hash(req.body.password, 8);
+    }
+  };
+
+  /////
+  rateCoach = async (req, res, next) => {
+    this.checkValidation(req);
+
+    const { coachId, rating } = req.body;
+    const userId = req.currentUser.id; // Assuming you have the user ID in the request
+
+    const result = await UserModel.rateCoach(userId, coachId, rating);
+
+    if (!result) {
+      throw new HttpException(500, "Something went wrong");
+    }
+
+    res.status(201).send("Coach has been rated!");
+  };
+  ///////////
+  getCoachRatingById = async (req, res, next) => {
+    try {
+      const coachId = req.params.coachId;
+      const coachRating = await UserModel.getCoachRatingById(coachId);
+
+      if (!coachRating) {
+        throw new HttpException(404, "Aucun rating de coach trouvé");
+      }
+
+      res.send(coachRating);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  addCommentToCoach = async (req, res, next) => {
+    try {
+      const { coachId, comment } = req.body;
+
+      // L'ID de l'utilisateur est extrait à partir du token
+      const userId = req.currentUser.id;
+
+      const result = await UserModel.addComment({ userId, coachId, comment });
+
+      if (!result) {
+        throw new HttpException(500, "Erreur lors de l'ajout du commentaire");
+      }
+
+      res.status(201).send("Commentaire ajouté avec succès !");
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getCoachComments = async (req, res, next) => {
+    try {
+      const coachId = req.params.coachId;
+      const comments = await UserModel.getCoachComments(coachId);
+
+      // Manipulez les données comme vous le souhaitez avant de les renvoyer
+      const formattedComments = comments.map((comment) => ({
+        comment: comment.comment,
+        created_at: comment.created_at,
+        user: {
+          nom: comment.user_nom,
+          prenom: comment.user_prenom,
+        },
+      }));
+
+      res.send(formattedComments);
+    } catch (error) {
+      next(error);
     }
   };
 }
