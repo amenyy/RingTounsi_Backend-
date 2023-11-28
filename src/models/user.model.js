@@ -49,6 +49,7 @@ class UserModel {
       date_inscription,
       role,
       status,
+      bio,
     ]);
     const affectedRows = result ? result.affectedRows : 0;
 

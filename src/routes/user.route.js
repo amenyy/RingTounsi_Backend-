@@ -29,11 +29,7 @@ router.post(
   createUserSchema,
   awaitHandlerFactory(userController.createUser)
 ); // localhost:3000/api/v1/users
-router.patch(
-  "/id/:id",
-  updateUserSchema,
-  awaitHandlerFactory(userController.updateUser)
-); // localhost:3000/api/v1/users/id/1 , using patch for partial update
+router.patch("/id/:id",updateUserSchema,awaitHandlerFactory(userController.updateUser)); // localhost:3000/api/v1/users/id/1 , using patch for partial update
 router.delete(
   "/id/:id",
   auth(Role.Admin),
