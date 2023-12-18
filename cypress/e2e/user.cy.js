@@ -1,5 +1,4 @@
 describe("User API Tests", () => {
-  // Helper function to create a new user
   let authToken;
   let userId;
   const createUser = () => {
@@ -19,12 +18,10 @@ describe("User API Tests", () => {
       body: user,
       failOnStatusCode: false,
     }).then((response) => {
-      // Assert that the server responded with a 201 status code (Created)
-      expect(response.status).to.equal(201); // Update to expect 201 instead of 200
+      expect(response.status).to.equal(201);
     });
   };
 
-  // Helper function to log in a user
   const loginUser = () => {
     const credentials = {
       email: "admin.doe@example.com",
@@ -41,18 +38,13 @@ describe("User API Tests", () => {
   };
 
   it("should get all users", () => {
-    //createUser(); // Create a user for testing
-
-    // Use cy.request() to make a GET request
     cy.request({
       method: "GET",
       url: "http://localhost:3000/api/v1/users",
-      failOnStatusCode: false, // Prevent Cypress from failing the test on non-2xx responses
+      failOnStatusCode: false,
     }).then((response) => {
-      // Assert the status code
       expect(response.status).to.equal(200);
 
-      // Assert the body
       expect(response.body).to.be.an("array");
     });
   });
@@ -74,13 +66,10 @@ describe("User API Tests", () => {
       body: user,
       failOnStatusCode: false,
     }).then((response) => {
-      // Assert that the server responded with a 400 status code
       expect(response.status).to.equal(400);
 
-      // Assert the content type
       expect(response.headers["content-type"]).to.include("application/json");
 
-      // Assert the response body contains the expected error message
       expect(response.body).to.have.property("type", "error");
       expect(response.body).to.have.property("status", 400);
       expect(response.body).to.have.property("message", "Validation faild");
@@ -173,15 +162,14 @@ describe("User API Tests", () => {
       method: "POST",
       url: "http://localhost:3000/api/v1/users/login",
       body: invalidCredentials,
-      failOnStatusCode: false, // Prevent Cypress from failing the test on non-2xx responses
+      failOnStatusCode: false,
     }).then((response) => {
-      expect(response.status).to.equal(401); // Or any other expected status code for login failure
+      expect(response.status).to.equal(401);
       expect(response.body.message).to.equal("Unable to login!");
     });
   });
 
   const updatedUserData = {
-    // Provide the fields you want to update
     nom: "UpdatedName",
     prenom: "UpdatedLastName",
     email: "admin.doe@example.com",
@@ -192,9 +180,8 @@ describe("User API Tests", () => {
   };
 
   it("should update a user", () => {
-    loginUser(); // Log in to get the authentication token
+    loginUser();
 
-    // Use cy.wrap to persist the alias
     cy.wrap().then(() => {
       cy.get("@adminAuthToken").then((authToken) => {
         cy.request({
@@ -206,17 +193,15 @@ describe("User API Tests", () => {
           body: updatedUserData,
           failOnStatusCode: false,
         }).then((response) => {
-          // Check the response status and handle accordingly
-          expect(response.status).to.equal(200); // Or any other expected status code
+          expect(response.status).to.equal(200);
         });
       });
     });
   });
 
   it("should delete a user", () => {
-    loginUser(); // Log in to get the authentication token
+    loginUser();
 
-    // Use cy.wrap to persist the alias
     cy.wrap().then(() => {
       cy.get("@adminAuthToken").then((authToken) => {
         cy.request({
@@ -227,8 +212,7 @@ describe("User API Tests", () => {
           },
           failOnStatusCode: false,
         }).then((response) => {
-          // Check the response status and handle accordingly
-          expect(response.status).to.equal(200); // Or any other expected status code
+          expect(response.status).to.equal(200);
         });
       });
     });
